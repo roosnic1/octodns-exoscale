@@ -37,12 +37,13 @@ class ExoscaleProvider(BaseProvider):
             "AAAA",
             "CAA",
             "CNAME",
-            "DS",
+            "HINFO",
             "MX",
+            "NAPTR",
             "NS",
+            "SPF",
             "SRV",
             "SSHFP",
-            "TLSA",
             "TXT",
         )
     )
