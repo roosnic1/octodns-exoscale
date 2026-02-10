@@ -28,8 +28,6 @@ _Exoscale provider for octoDNS_
     - [Run linter and formatter](#run-linter-and-formatter)
     - [Run test](#run-test)
 - [Support &amp; Assistance](#-support--assistance)
-- [Contributing](#-contributing)
-- [Security](#-security)
 - [License](#-license)
 <!-- template:end:table_of_content -->
 
@@ -47,10 +45,9 @@ Install the package `pip install octodns-exoscale`.
 <!-- template:end:configuration -->
 ```yaml
 providers:
-  infomaniak:
+  exoscale:
     class: octodns_exoscale.ExoscaleProvider
-    # The API Token or API Key.
-    # Required permissions for API Tokens are dns:read and dns:write.
+    # The auth-key, auth-secret and auth-zone are required.
     auth-key: env/EXOSCALE_AUTH_KEY
     auth-secret: env/EXOSCALE_AUTH_SECRET
     auth-zone: env/EXOSCALE_AUTH_ZONE
@@ -61,39 +58,31 @@ providers:
 
 
 ### Run linter and formatter
+```bash
+black octodns_exoscale/ test/
+isort octodns_exoscale/ test/
+```
 
 
 ### Run test
+```bash
+# Run all tests
+pytest
+
+# Run a single test
+pytest test/test_main.py::test_populate_A
+```
 
 
 <!-- template:end:dev -->
 
 <!-- template:begin:support -->
 ## 🙋‍♂️ Support & Assistance
-
-- Take a look at the [support](SUPPORT.md) document on
-  guidelines for tips on how to ask the right questions.
-- For all questions/features/bugs/issues [head over here](/../../issues/new/choose).
+For all questions/features/bugs/issues [head over here](/../../issues/new/choose).
 <!-- template:end:support -->
-
-<!-- template:begin:contributing -->
-## 🤝 Contributing
-
-- Please review the [Code of Conduct](CODE_OF_CONDUCT.md) for guidelines
-  on ensuring everyone has the best experience interacting with the community.
-- We welcome and encourage contributions to this project !
-  Please review the [contributing](CONTRIBUTING.md) doc for submitting
-  issues/a guide on submitting pull requests and helping out.
-<!-- template:end:contributing -->
-
-<!-- template:begin:security -->
-## 🛡️ Security
-
-See [security](SECURITY.md) file for details.
-<!-- template:end:security -->
 
 <!-- template:begin:license -->
 ## ⚖️ License
 
-See [here](LICENSE_en.txt).
+See [here](LICENSE).
 <!-- template:end:license -->
