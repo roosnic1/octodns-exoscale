@@ -25,7 +25,8 @@ from octodns.provider.base import BaseProvider, Plan
 
 from exoscale.api.v2 import Client
 
-__version__ = __VERSION__ = '0.0.1'
+__version__ = __VERSION__ = "0.0.1"
+
 
 class ExoscaleProvider(BaseProvider):
     SUPPORTS_GEO = False
@@ -61,9 +62,7 @@ class ExoscaleProvider(BaseProvider):
         if self._zones is None:
             dns_domains_list = self._client.list_dns_domains()
             self._zones = IdnaDict(
-                {
-                    f'{z["unicode-name"]}.': {'id': z['id']} for z in dns_domains_list['dns-domains']
-                }
+                {f'{z["unicode-name"]}.': {"id": z["id"]} for z in dns_domains_list["dns-domains"]}
             )
         return self._zones
 
@@ -91,9 +90,7 @@ class ExoscaleProvider(BaseProvider):
             _name = record["name"]
 
             if _type not in self.SUPPORTS:
-                self.log.warning(
-                    f"populate: skipping unsupported {_type} {_name}.{zone} record"
-                )
+                self.log.warning(f"populate: skipping unsupported {_type} {_name}.{zone} record")
                 continue
             values[_name][_type].append(record)
 
@@ -119,21 +116,19 @@ class ExoscaleProvider(BaseProvider):
             "populate:   found %s records, exists=%s",
             len(zone.records) - before,
             exists,
-            )
+        )
 
         return exists
 
     def zone_records(self, zone: Zone) -> list[dict[str, Any]]:
         if zone.name not in self._zone_records:
             self._zone_records[zone.name] = self._client.list_dns_domain_records(
-                domain_id=self.zones[zone.name]['id']
-            )['dns-domain-records']
+                domain_id=self.zones[zone.name]["id"]
+            )["dns-domain-records"]
 
         return self._zone_records[zone.name]
 
-    def _data_for_multiple(
-            self, _type: str, records: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+    def _data_for_multiple(self, _type: str, records: list[dict[str, Any]]) -> dict[str, Any]:
         return {
             "ttl": records[0]["ttl"],
             "type": _type,
@@ -145,14 +140,12 @@ class ExoscaleProvider(BaseProvider):
     _data_for_TXT = _data_for_multiple
 
     def _data_for_CAA(
-            self, _type: str, records: list[dict[str, str]]
+        self, _type: str, records: list[dict[str, str]]
     ) -> dict[str, Union[str, int, list]]:
         values = []
         for record in records:
             flags, tag, value = record["content"].split(" ", 2)
-            values.append(
-                {"flags": int(flags), "tag": tag, "value": value.replace('"', "")}
-            )
+            values.append({"flags": int(flags), "tag": tag, "value": value.replace('"', "")})
 
         return {"ttl": records[0]["ttl"], "type": _type, "values": values}
 
@@ -162,7 +155,6 @@ class ExoscaleProvider(BaseProvider):
             "type": _type,
             "value": self._get_fqdn(records[0]["content"]),
         }
-
 
     def _data_for_MX(self, _type: str, records: list[dict[str, Any]]) -> dict[str, Any]:
         values = []
@@ -183,9 +175,7 @@ class ExoscaleProvider(BaseProvider):
             "values": [self._get_fqdn(record["content"]) for record in records],
         }
 
-    def _data_for_SRV(
-            self, _type: str, records: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+    def _data_for_SRV(self, _type: str, records: list[dict[str, Any]]) -> dict[str, Any]:
         values = []
         for record in records:
             weight, port, target = record["content"].split(" ", 2)
@@ -200,9 +190,7 @@ class ExoscaleProvider(BaseProvider):
 
         return {"ttl": records[0]["ttl"], "type": _type, "values": values}
 
-    def _data_for_NAPTR(
-            self, _type: str, records: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+    def _data_for_NAPTR(self, _type: str, records: list[dict[str, Any]]) -> dict[str, Any]:
         values = []
         for record in records:
             order, preference, flags, service, regexp, replacement = record["content"].split(" ", 5)
@@ -210,18 +198,16 @@ class ExoscaleProvider(BaseProvider):
                 {
                     "order": int(order),
                     "preference": int(preference),
-                    "flags": flags.replace('"', '').upper(),
-                    "service": service.replace('"', ''),
-                    "regexp": regexp.replace('"', ''),
+                    "flags": flags.replace('"', "").upper(),
+                    "service": service.replace('"', ""),
+                    "regexp": regexp.replace('"', ""),
                     "replacement": replacement,
                 }
             )
 
         return {"ttl": records[0]["ttl"], "type": _type, "values": values}
 
-    def _data_for_SSHFP(
-            self, _type: str, records: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+    def _data_for_SSHFP(self, _type: str, records: list[dict[str, Any]]) -> dict[str, Any]:
         values = []
         for record in records:
             algorithm, fingerprint_type, fingerprint = record["content"].split(" ", 2)
@@ -236,7 +222,7 @@ class ExoscaleProvider(BaseProvider):
         return {"ttl": records[0]["ttl"], "type": _type, "values": values}
 
     def _params_for_multiple(
-            self, record: Union[ARecord, AaaaRecord, NsRecord, TxtRecord]
+        self, record: Union[ARecord, AaaaRecord, NsRecord, TxtRecord]
     ) -> Iterator[dict[str, Any]]:
         for value in record.values:
             yield {
@@ -291,7 +277,7 @@ class ExoscaleProvider(BaseProvider):
         for value in record.values:
             yield {
                 "name": self._get_record_name(record.name),
-                "content": f"{value.order} {value.preference} \"{value.flags.lower()}\" \"{value.service}\" \"{value.regexp}\" {value.replacement}",
+                "content": f'{value.order} {value.preference} "{value.flags.lower()}" "{value.service}" "{value.regexp}" {value.replacement}',
                 "ttl": record.ttl,
                 "type": record._type,
             }
@@ -314,7 +300,7 @@ class ExoscaleProvider(BaseProvider):
                 param["name"] = ""
 
             kwargs = {
-                "domain_id": self.zones[new.zone.name]['id'],
+                "domain_id": self.zones[new.zone.name]["id"],
                 "name": param["name"],
                 "type": param["type"],
                 "content": param["content"],
@@ -334,8 +320,8 @@ class ExoscaleProvider(BaseProvider):
             name = existing.name
             if name == record["name"] and existing._type == record["type"]:
                 self._client.delete_dns_domain_record(
-                    domain_id=self.zones[existing.zone.name]['id'],
-                    record_id=record["id"]
+                    domain_id=self.zones[existing.zone.name]["id"],
+                    record_id=record["id"],
                 )
 
     def _apply_update(self, changes: Change):

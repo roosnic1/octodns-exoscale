@@ -1,0 +1,40 @@
+[project]
+name = "octodns-exoscale"
+version = "0.0.1"
+description = "Exoscale provider for octoDNS"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [{ name = "Nico Roos", email = "nicolas.k.roos@protonmail.com" }]
+dependencies = [
+    "octodns>=1.15.0",
+    "requests>=2.32.5",
+    "exoscale>=0.16.1",
+]
+
+[project.urls]
+Repository = "https://github.com/roosnic1/octodns-exoscale"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    # https://black.readthedocs.io/en/stable/the_black_code_style/index.html#stability-policy
+    "black>=24.3.0,<25.0.0",
+    "isort>=5.11.5",
+    "pyflakes>=2.2.0",
+]
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["octodns_exoscale*"]
+
+[tool.black]
+line-length = 100
+
+[tool.isort]
+profile = "black"
+line_length = 100
