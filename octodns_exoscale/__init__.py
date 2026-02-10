@@ -10,13 +10,13 @@ from octodns.record import (
     CaaRecord,
     Change,
     CnameRecord,
-    DsRecord,
     MxRecord,
+    NaptrRecord,
     NsRecord,
     Record,
+    SpfRecord,
     SrvRecord,
     SshfpRecord,
-    TlsaRecord,
     TxtRecord,
 )
 
@@ -37,7 +37,6 @@ class ExoscaleProvider(BaseProvider):
             "AAAA",
             "CAA",
             "CNAME",
-            "HINFO",
             "MX",
             "NAPTR",
             "NS",
@@ -150,7 +149,7 @@ class ExoscaleProvider(BaseProvider):
     ) -> dict[str, Union[str, int, list]]:
         values = []
         for record in records:
-            flags, tag, value = record["target"].split(" ", 2)
+            flags, tag, value = record["content"].split(" ", 2)
             values.append(
                 {"flags": int(flags), "tag": tag, "value": value.replace('"', "")}
             )
@@ -161,23 +160,9 @@ class ExoscaleProvider(BaseProvider):
         return {
             "ttl": records[0]["ttl"],
             "type": _type,
-            "value": self._get_fqdn(records[0]["target"]),
+            "value": self._get_fqdn(records[0]["content"]),
         }
 
-    def _data_for_DS(self, _type: str, records: list[dict[str, Any]]) -> dict[str, Any]:
-        values = []
-        for record in records:
-            key_tag, algorithm, digest_type, digest = record["target"].split(" ", 3)
-            values.append(
-                {
-                    "algorithm": int(algorithm),
-                    "digest": digest,
-                    "digest_type": int(digest_type),
-                    "key_tag": int(key_tag),
-                }
-            )
-
-        return {"ttl": records[0]["ttl"], "type": _type, "values": values}
 
     def _data_for_MX(self, _type: str, records: list[dict[str, Any]]) -> dict[str, Any]:
         values = []
@@ -203,13 +188,32 @@ class ExoscaleProvider(BaseProvider):
     ) -> dict[str, Any]:
         values = []
         for record in records:
-            priority, weight, port, target = record["target"].split(" ", 3)
+            weight, port, target = record["content"].split(" ", 2)
             values.append(
                 {
-                    "priority": int(priority),
+                    "priority": record["priority"],
                     "weight": int(weight),
                     "port": int(port),
                     "target": self._get_fqdn(target),
+                }
+            )
+
+        return {"ttl": records[0]["ttl"], "type": _type, "values": values}
+
+    def _data_for_NAPTR(
+            self, _type: str, records: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        values = []
+        for record in records:
+            order, preference, flags, service, regexp, replacement = record["content"].split(" ", 5)
+            values.append(
+                {
+                    "order": int(order),
+                    "preference": int(preference),
+                    "flags": flags.replace('"', '').upper(),
+                    "service": service.replace('"', ''),
+                    "regexp": regexp.replace('"', ''),
+                    "replacement": replacement,
                 }
             )
 
@@ -231,32 +235,13 @@ class ExoscaleProvider(BaseProvider):
 
         return {"ttl": records[0]["ttl"], "type": _type, "values": values}
 
-    def _data_for_TLSA(
-            self, _type: str, records: list[dict[str, Any]]
-    ) -> dict[str, Any]:
-        values = []
-        for record in records:
-            certificate_usage, selector, matching_type, certificate_association_data = (
-                record["target"].split(" ", 3)
-            )
-            values.append(
-                {
-                    "certificate_usage": int(certificate_usage),
-                    "selector": int(selector),
-                    "matching_type": int(matching_type),
-                    "certificate_association_data": certificate_association_data,
-                }
-            )
-
-        return {"ttl": records[0]["ttl"], "type": _type, "values": values}
-
     def _params_for_multiple(
             self, record: Union[ARecord, AaaaRecord, NsRecord, TxtRecord]
     ) -> Iterator[dict[str, Any]]:
         for value in record.values:
             yield {
-                "source": self._get_record_name(record.name),
-                "target": value.replace("\\;", ";"),
+                "name": self._get_record_name(record.name),
+                "content": value.replace("\\;", ";"),
                 "ttl": record.ttl,
                 "type": record._type,
             }
@@ -269,34 +254,25 @@ class ExoscaleProvider(BaseProvider):
     def _params_for_CAA(self, record: CaaRecord) -> Iterator[dict[str, Any]]:
         for value in record.values:
             yield {
-                "source": self._get_record_name(record.name),
-                "target": f'{value.flags} {value.tag} "{value.value}"',
+                "name": self._get_record_name(record.name),
+                "content": f'{value.flags} {value.tag} "{value.value}"',
                 "ttl": record.ttl,
                 "type": record._type,
             }
 
     def _params_for_CNAME(self, record: CnameRecord) -> Iterator[dict[str, Any]]:
         yield {
-            "source": self._get_record_name(record.name),
-            "target": record.value,
+            "name": self._get_record_name(record.name),
+            "content": record.value,
             "ttl": record.ttl,
             "type": record._type,
         }
 
-    def _params_for_DS(self, record: DsRecord) -> Iterator[dict[str, Any]]:
-        for value in record.values:
-            yield {
-                "source": self._get_record_name(record.name),
-                "target": f"{value.key_tag} {value.algorithm} {value.digest_type} {value.digest}",
-                "ttl": record.ttl,
-                "type": record._type,
-            }
-
     def _params_for_MX(self, record: MxRecord) -> Iterator[dict[str, Any]]:
         for value in record.values:
             yield {
-                "source": self._get_record_name(record.name),
-                "target": f"{value.preference} {value.exchange}",
+                "name": self._get_record_name(record.name),
+                "content": f"{value.preference} {value.exchange}",
                 "ttl": record.ttl,
                 "type": record._type,
             }
@@ -304,8 +280,18 @@ class ExoscaleProvider(BaseProvider):
     def _params_for_SRV(self, record: SrvRecord) -> Iterator[dict[str, Any]]:
         for value in record.values:
             yield {
-                "source": self._get_record_name(record.name),
-                "target": f"{value.priority} {value.weight} {value.port} {value.target}",
+                "name": self._get_record_name(record.name),
+                "priority": value.priority,
+                "content": f"{value.weight} {value.port} {value.target}",
+                "ttl": record.ttl,
+                "type": record._type,
+            }
+
+    def _params_for_NAPTR(self, record: SrvRecord) -> Iterator[dict[str, Any]]:
+        for value in record.values:
+            yield {
+                "name": self._get_record_name(record.name),
+                "content": f"{value.order} {value.preference} \"{value.flags.lower()}\" \"{value.service}\" \"{value.regexp}\" {value.replacement}",
                 "ttl": record.ttl,
                 "type": record._type,
             }
@@ -313,17 +299,8 @@ class ExoscaleProvider(BaseProvider):
     def _params_for_SSHFP(self, record: SshfpRecord) -> Iterator[dict[str, Any]]:
         for value in record.values:
             yield {
-                "source": self._get_record_name(record.name),
-                "target": f"{value.algorithm} {value.fingerprint_type} {value.fingerprint}",
-                "ttl": record.ttl,
-                "type": record._type,
-            }
-
-    def _params_for_TLSA(self, record: TlsaRecord) -> Iterator[dict[str, Any]]:
-        for value in record.values:
-            yield {
-                "source": self._get_record_name(record.name),
-                "target": f"{value.certificate_usage} {value.selector} {value.matching_type} {value.certificate_association_data}",
+                "name": self._get_record_name(record.name),
+                "content": f"{value.algorithm} {value.fingerprint_type} {value.fingerprint}",
                 "ttl": record.ttl,
                 "type": record._type,
             }
@@ -333,12 +310,21 @@ class ExoscaleProvider(BaseProvider):
         params_for = getattr(self, f"_params_for_{new._type}")
 
         for param in params_for(new):
-            if param["source"] == ".":
-                param["source"] = ""
+            if param["name"] == ".":
+                param["name"] = ""
 
-            self._client.post_record(
-                self._get_zone_without_trailling_dot(new.zone.name), param
-            )
+            kwargs = {
+                "domain_id": self.zones[new.zone.name]['id'],
+                "name": param["name"],
+                "type": param["type"],
+                "content": param["content"],
+                "ttl": param["ttl"],
+            }
+
+            if "priority" in param:
+                kwargs["priority"] = param["priority"]
+
+            self._client.create_dns_domain_record(**kwargs)
 
     def _apply_delete(self, changes: Change):
         existing = changes.existing
@@ -346,12 +332,10 @@ class ExoscaleProvider(BaseProvider):
 
         for record in self.zone_records(zone):
             name = existing.name
-            if name == "":
-                name = "."
-
-            if name == record["source"] and existing._type == record["type"]:
-                self._client.delete_record(
-                    self._get_zone_without_trailling_dot(zone.name), record["id"]
+            if name == record["name"] and existing._type == record["type"]:
+                self._client.delete_dns_domain_record(
+                    domain_id=self.zones[existing.zone.name]['id'],
+                    record_id=record["id"]
                 )
 
     def _apply_update(self, changes: Change):
