@@ -1,12 +1,13 @@
-from typing import Any, Union, Iterator
 import logging
 from collections import defaultdict
+from typing import Any, Iterator, Union
 
+from exoscale.api.v2 import Client
 from octodns.idna import IdnaDict
-from octodns.zone import Zone
+from octodns.provider.base import BaseProvider, Plan
 from octodns.record import (
-    ARecord,
     AaaaRecord,
+    ARecord,
     CaaRecord,
     Change,
     CnameRecord,
@@ -14,16 +15,12 @@ from octodns.record import (
     NaptrRecord,
     NsRecord,
     Record,
-    SpfRecord,
+    #SpfRecord,
     SrvRecord,
     SshfpRecord,
     TxtRecord,
 )
-
-from octodns.provider.base import BaseProvider, Plan
-
-
-from exoscale.api.v2 import Client
+from octodns.zone import Zone
 
 __version__ = __VERSION__ = "0.0.1"
 
@@ -41,7 +38,7 @@ class ExoscaleProvider(BaseProvider):
             "MX",
             "NAPTR",
             "NS",
-            "SPF",
+            #"SPF",
             "SRV",
             "SSHFP",
             "TXT",
@@ -273,7 +270,7 @@ class ExoscaleProvider(BaseProvider):
                 "type": record._type,
             }
 
-    def _params_for_NAPTR(self, record: SrvRecord) -> Iterator[dict[str, Any]]:
+    def _params_for_NAPTR(self, record: NaptrRecord) -> Iterator[dict[str, Any]]:
         for value in record.values:
             yield {
                 "name": self._get_record_name(record.name),
