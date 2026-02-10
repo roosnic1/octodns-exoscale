@@ -224,7 +224,7 @@ class ExoscaleProvider(BaseProvider):
     ) -> dict[str, Any]:
         values = []
         for record in records:
-            algorithm, fingerprint_type, fingerprint = record["target"].split(" ", 2)
+            algorithm, fingerprint_type, fingerprint = record["content"].split(" ", 2)
             values.append(
                 {
                     "algorithm": int(algorithm),
