@@ -25,7 +25,7 @@ from octodns.provider.base import BaseProvider, Plan
 
 from exoscale.api.v2 import Client
 
-
+__version__ = __VERSION__ = '0.0.1'
 
 class ExoscaleProvider(BaseProvider):
     SUPPORTS_GEO = False
