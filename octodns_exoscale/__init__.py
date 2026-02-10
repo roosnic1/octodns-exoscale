@@ -22,8 +22,6 @@ from octodns.record import (
 )
 from octodns.zone import Zone
 
-__version__ = __VERSION__ = "0.0.1"
-
 
 class ExoscaleProvider(BaseProvider):
     SUPPORTS_GEO = False
