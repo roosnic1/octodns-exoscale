@@ -41,7 +41,7 @@ The entire provider is in `octodns_exoscale/__init__.py`. Key structure:
   - `_params_for_<TYPE>()` methods — convert octoDNS records to Exoscale API request params
   - Updates are implemented as delete + create
 
-**Supported record types:** A, AAAA, CAA, CNAME, MX, NAPTR, NS, SPF, SRV, SSHFP, TXT
+**Supported record types:** A, AAAA, CAA, CNAME, MX, NAPTR, NS, SRV, SSHFP, TXT
 
 **Exoscale API field conventions:** All record data uses the `content` field (not `target`). Record identification uses the `name` field. API methods: `create_dns_domain_record(**kwargs)`, `delete_dns_domain_record(domain_id, record_id)`, `list_dns_domain_records(domain_id)`, `list_dns_domains()`.
 

@@ -15,7 +15,6 @@ from octodns.record import (
     NaptrRecord,
     NsRecord,
     Record,
-    #SpfRecord,
     SrvRecord,
     SshfpRecord,
     TxtRecord,
@@ -36,7 +35,6 @@ class ExoscaleProvider(BaseProvider):
             "MX",
             "NAPTR",
             "NS",
-            #"SPF",
             "SRV",
             "SSHFP",
             "TXT",
@@ -60,9 +58,6 @@ class ExoscaleProvider(BaseProvider):
                 {f'{z["unicode-name"]}.': {"id": z["id"]} for z in dns_domains_list["dns-domains"]}
             )
         return self._zones
-
-    def _get_zone_without_trailling_dot(self, zone: str) -> str:
-        return zone.rstrip(".")
 
     def _get_fqdn(self, name: str) -> str:
         return name if name.endswith(".") else f"{name}."
