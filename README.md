@@ -8,14 +8,6 @@ _Exoscale provider for octoDNS_
 
 </div>
 
-[//]: # (<div align="center">)
-
-[//]: # ()
-[//]: # ([![Pypi]&#40;https://img.shields.io/pypi/v/octodns-infomaniak?label=&logo=pypi&style=for-the-badge&logoColor=yellow&color=3776AB&#41;]&#40;https://pypi.python.org/pypi/octodns-infomaniak&#41;)
-
-[//]: # ([![Python]&#40;https://img.shields.io/pypi/pyversions/octodns-infomaniak?label=&logo=python&style=for-the-badge&logoColor=yellow&color=3776AB&#41;]&#40;https://pypi.python.org/pypi/octodns-infomaniak&#41;)
-
-[//]: # (</div>)
 
 <!-- template:end:header -->
 

@@ -59,9 +59,6 @@ class ExoscaleProvider(BaseProvider):
             )
         return self._zones
 
-    def _get_zone_without_trailling_dot(self, zone: str) -> str:
-        return zone.rstrip(".")
-
     def _get_fqdn(self, name: str) -> str:
         return name if name.endswith(".") else f"{name}."
 
