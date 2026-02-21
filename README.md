@@ -39,10 +39,14 @@ Install the package `pip install octodns-exoscale`.
 providers:
   exoscale:
     class: octodns_exoscale.ExoscaleProvider
-    # The auth-key, auth-secret and auth-zone are required.
-    auth-key: env/EXOSCALE_AUTH_KEY
-    auth-secret: env/EXOSCALE_AUTH_SECRET
-    auth-zone: env/EXOSCALE_AUTH_ZONE
+    # The auth_key, auth_secret and auth_zone are required.
+    auth_key: env/EXOSCALE_AUTH_KEY
+    auth_secret: env/EXOSCALE_AUTH_SECRET
+    auth_zone: env/EXOSCALE_AUTH_ZONE
+    # This provider can't create Zones. Create the DNS zone manually 
+    # in the exoscale dashboard first.
+    create_zone: false 
+    
 ```
 
 <!-- template:begin:dev -->
