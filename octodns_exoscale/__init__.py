@@ -113,13 +113,13 @@ class ExoscaleProvider(BaseProvider):
     def zone_records(self, zone: Zone) -> list[dict[str, Any]]:
         if zone.name not in self._zone_records:
             if zone.name not in self.zones:
-                self.log.warning(f"Zone {zone.name} does not exist.")
+                self.log.warning("Zone %s does not exist.", zone.name)
                 return []
             response = self._client.list_dns_domain_records(
                 domain_id=self.zones[zone.name]["id"]
             )
             if "dns-domain-records" not in response:
-                self.log.warning(f"Unexpected API response for zone {zone.name}: missing 'dns-domain-records' key.")
+                self.log.warning("Unexpected API response for zone %s: missing 'dns-domain-records' key.", zone.name)
                 return []
             self._zone_records[zone.name] = response["dns-domain-records"]
 
