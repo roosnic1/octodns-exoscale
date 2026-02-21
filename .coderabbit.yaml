@@ -1,0 +1,27 @@
+language: "en-US"
+tone_instructions: "Be concise and practical. Focus on correctness and maintainability."
+reviews:
+  profile: "assertive"
+  auto_review:
+    enabled: true
+    drafts: false
+    ignore_title_keywords:
+      - "WIP"
+    base_branches:
+      - main
+  path_filters:
+    - "!**/*.egg-info/**"
+    - "!**/__pycache__/**"
+  path_instructions:
+    - path: "octodns_exoscale/**/*.py"
+      instructions: |
+        This is an octoDNS provider for Exoscale DNS.
+        - Follow octoDNS provider conventions (BaseProvider subclass patterns).
+        - All DNS record data uses the `content` field, not `target`.
+        - Updates are implemented as delete + create (no in-place update).
+        - Check for proper error handling when calling the Exoscale API v2 client.
+    - path: "test/**/*.py"
+      instructions: |
+        Tests use pytest. Ensure mocks accurately reflect the Exoscale API v2 response structure.
+chat:
+  auto_reply: true
