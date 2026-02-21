@@ -24,7 +24,7 @@ from octodns.zone import Zone
 
 class ExoscaleProvider(BaseProvider):
     SUPPORTS_GEO = False
-    SUPPORTS_ROOT_NS = True
+    SUPPORTS_ROOT_NS = False
     SUPPORTS_POOL_VALUE_STATUS = False
     SUPPORTS = set(
         (
@@ -112,9 +112,16 @@ class ExoscaleProvider(BaseProvider):
 
     def zone_records(self, zone: Zone) -> list[dict[str, Any]]:
         if zone.name not in self._zone_records:
-            self._zone_records[zone.name] = self._client.list_dns_domain_records(
+            if zone.name not in self.zones:
+                self.log.warning(f"Zone {zone.name} does not exist.")
+                return []
+            response = self._client.list_dns_domain_records(
                 domain_id=self.zones[zone.name]["id"]
-            )["dns-domain-records"]
+            )
+            if "dns-domain-records" not in response:
+                self.log.warning(f"Unexpected API response for zone {zone.name}: missing 'dns-domain-records' key.")
+                return []
+            self._zone_records[zone.name] = response["dns-domain-records"]
 
         return self._zone_records[zone.name]
 
@@ -288,6 +295,10 @@ class ExoscaleProvider(BaseProvider):
         for param in params_for(new):
             if param["name"] == ".":
                 param["name"] = ""
+
+            if new.zone.name not in self.zones:
+                self.log.error(f"Can not create record {param['name']} in zone {new.zone.name} because zone doesn't exist. Please create it first.")
+                continue
 
             kwargs = {
                 "domain_id": self.zones[new.zone.name]["id"],
