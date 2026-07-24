@@ -4,7 +4,7 @@ version = "0.1.2"
 description = "Exoscale provider for octoDNS"
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [{ name = "Nico Roos", email = "nicolas.k.roos@protonmail.com" }]
 dependencies = [
     "octodns>=1.21.0",
