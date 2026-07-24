@@ -109,7 +109,7 @@ API_RECORDS = [
         "id": "r-sshfp-1",
         "name": ".",
         "type": "SSHFP",
-        "content": "1 1 AABBCCDD",
+        "content": "1 1 AABBCCDDAABBCCDDAABBCCDDAABBCCDDAABBCCDD",
         "ttl": 300,
     },
     {
@@ -232,7 +232,7 @@ def test_populate_SSHFP():
     values = list(record.values)
     assert values[0].algorithm == 1
     assert values[0].fingerprint_type == 1
-    assert values[0].fingerprint == "aabbccdd"
+    assert values[0].fingerprint == "aabbccddaabbccddaabbccddaabbccddaabbccdd"
 
 
 def test_populate_TXT():
